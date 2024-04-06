@@ -1,0 +1,72 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    environment:
+      POSTGRES_PASSWORD: password2
+      POSTGRES_USER: adminms4m
+      POSTGRES_DB: app
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+  gateway-develop:
+    image: gd:latest
+    container_name: gateway-develop
+    ports:
+     - "8081:8080"
+    expose:
+      - "8081"
+    environment:
+      ENV_DATASOURCE_NAME : CSCloud
+      ENV_DATASOURCE_PASSWORD : password2
+      ENV_DATASOURCE_URL : jdbc:postgresql://postgres:5432/app
+      ENV_DATASOURCE_USERNAME : adminms4m
+      ENV_URI_COMMON_AZURE : http://common-backend-service.ms4m-dev:8080
+      ENV_URI_EQUIPMENT_AZURE : http://localhost:8082
+      ENV_URI_GEOLOGY_AZURE : http://geology-backend-service.ms4m-dev:8080
+      ENV_URI_HUMANRESOURCES_AZURE : http://human-resource:8080
+      ENV_URI_OPERATIONAL_AZURE : http://operational-backend-service.ms4m-dev:8080
+      ENV_URI_SCHEDULE_AZURE : http://schedule-backend-service.ms4m-dev:8080
+      ENV_URI_SECURITY_AZURE : http://security-backend-service.ms4m-dev:8080
+      ENV_URI_SITE_AZURE : http://site-backend-service.ms4m-dev:8080
+      ENV_URI_SOCKET_FRONT : http://socket-frontend-service.ms4m-dev:80
+      ENV_URI_STATUS_AZURE : http://status-backend-service.ms4m-dev:8080
+      OTEL_EXPORTER_OTLP_ENDPOINT : http://192.168.25.102:4318/
+      OTEL_JAVAAGENT_DEBUG: true
+      OTEL_SERVICE_NAME: gateway-develop
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_METRICS_EXPORTER: otlp
+      OTEL_RESOURCE_ATTRIBUTES : environment=dev
+  human-resource:
+    image: hr:latest
+    container_name: human-resource
+    ports:
+      - 8080:8080
+    expose:
+      - "8080"
+    environment:
+      ENV_DATASOURCE_NAME : CSCloud
+      ENV_DATASOURCE_PASSWORD : password2
+      ENV_DATASOURCE_URL : jdbc:postgresql://postgres:5432/app
+      ENV_DATASOURCE_USERNAME : adminms4m
+      OTEL_EXPORTER_OTLP_ENDPOINT : http://192.168.25.102:4318/
+      OTEL_RESOURCE_ATTRIBUTES : environment=dev
+  # portal-frontend:
+  #   image: portal:latest
+  #   container_name: portal-frontend
+  #   # network: host
+  #   ports:
+  #     - 80:80
+  #   expose:
+  #     - "80"
+  #   environment:
+  #     REACT_APP_LOCAL_HOST_API_URL : http://gateway-develop:8081
+  #     REACT_APP_MICRO_FRONT_FORM : https://dev-forms-frontend.products-ms4m.com
+  #     REACT_APP_MICRO_FRONT_FOS : https://dev-fos-frontend.products-ms4m.com
+  #     REACT_APP_MICRO_FRONT_MAP : https://dev-map-frontend.products-ms4m.com
+  #     REACT_APP_MICRO_FRONT_PORTAL : https://dev-portal.products-ms4m.com/
+
+volumes:
+  postgres_data:
